@@ -5,8 +5,8 @@ import { fetchCountries } from './fetchCountries';
 var debounce = require('lodash.debounce');
 const input = document.querySelector('#search-box');
 const DEBOUNCE_DELAY = 300;
-const countryList = document.querySelector('.country-list');
-const countryInfo = document.querySelector('.country-info');
+export const countryList = document.querySelector('.country-list');
+export const countryInfo = document.querySelector('.country-info');
 
 input.addEventListener("input", debounce(onSearch, DEBOUNCE_DELAY))
 
@@ -35,8 +35,6 @@ function filterData(data) {
         flagUrl: country.flags.svg,
         lang: country.languages
     }))
-    console.log(filteredData);
-    console.log(filteredData.length);
     if (filteredData.length > 10) {
         return Notify.info('Too many matches found. Please enter a more specific name.')
     }
@@ -56,7 +54,7 @@ function createListMarkup(items) {
         return acc + `<li><img width="30" height="15" src="${item.flagUrl}" />${item.name}</li>`;
     }, '');
 }
-function clearElementContent(element) {
+export function clearElementContent(element) {
     return element.innerHTML = '';
 }
 function fillElementWithContent(element, markup, data) {
