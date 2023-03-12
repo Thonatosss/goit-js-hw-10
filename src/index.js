@@ -17,7 +17,13 @@ function onSearch(event) {
     const inputValue = input.value.trim();
 
     if (inputValue !== '') {
-        return fetchCountries(inputValue).then(filterData).catch(error => console.log(error));
+        return fetchCountries(inputValue)
+
+            .then(filterData)
+            .catch(error => console.log(error));
+    } else if (inputValue === '') {
+        clearElementContent(countryInfo);
+        clearElementContent(countryList);
     }
 
 }
@@ -32,32 +38,48 @@ function filterData(data) {
     console.log(filteredData);
     console.log(filteredData.length);
     if (filteredData.length > 10) {
-        Notify.info('Too many matches found. Please enter a more specific name.')
+        return Notify.info('Too many matches found. Please enter a more specific name.')
     }
-    else if (filteredData.length > 2 && filteredData.length < 10) {
-        countryList.insertAdjacentHTML('afterbegin', createListMarkup(filteredData));
+    else if (filteredData.length >= 2 && filteredData.length < 10) {
+        fillElementWithContent(countryList, createListMarkup, filteredData);
+        clearElementContent(countryInfo);
     }
     else if (filteredData.length === 1) {
-        countryInfo.insertAdjacentHTML('afterbegin', createCountryInfoMarkup(filteredData));
+        fillElementWithContent(countryInfo, createCountryInfoMarkup, filteredData);
+        clearElementContent(countryList);
     }
 
 
 }
-
 function createListMarkup(items) {
     return items.reduce((acc, item) => {
         return acc + `<li><img width="30" height="15" src="${item.flagUrl}" />${item.name}</li>`;
     }, '');
 }
-
+function clearElementContent(element) {
+    return element.innerHTML = '';
+}
+function fillElementWithContent(element, markup, data) {
+    return element.innerHTML = markup(data);
+}
 function createCountryInfoMarkup(items) {
     return items.reduce((acc, item) => {
         return acc + `
-        <h1><img width="30" height="15" src="${item.flagUrl}"/>${item.name}</h1>
-        <ul>
-        <li>Capital: ${item.capital}</li>
-        <li>Populatin: ${item.population}</li>
-        <li>Languages: ${item.languages}</li>
-        </ul>`;
+    <h1><img width="45" height="23" src="${item.flagUrl}"/>${item.name}</h1>
+    <ul>
+      <li>Capital: ${item.capital}</li>
+      <li>Population: ${item.population}</li>
+      <li>Languages: ${createLanguagesMarkup(item.lang)}</li>
+    </ul>`;
     }, '');
+}
+
+function createLanguagesMarkup(languagesObj) {
+    let langArr = [];
+    for (const key in languagesObj) {
+        langArr.push(languagesObj[key])
+    }
+    return langArr.map((country) => {
+        return `${country}`
+    }).join(', ')
 }
