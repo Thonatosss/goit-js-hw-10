@@ -15,19 +15,21 @@ input.addEventListener("input", debounce(onSearch, DEBOUNCE_DELAY))
 function onSearch(event) {
     event.preventDefault()
     const inputValue = input.value.trim();
+    clearElementContent(countryInfo);
+    clearElementContent(countryList);
 
     if (inputValue !== '') {
         return fetchCountries(inputValue)
 
             .then(filterData)
-            .catch(error => console.log(error));
-    } else if (inputValue === '') {
-        clearElementContent(countryInfo);
-        clearElementContent(countryList);
-    }
+            .catch(error => Notify.failure('Oops, there is no country with that name'));
 
 }
+}
 function filterData(data) {
+    if (data.length > 10) {
+        return Notify.info('Too many matches found. Please enter a more specific name.')
+    }
     const filteredData = data.map(country => ({
         name: country.name.official,
         capital: country.capital,
@@ -35,14 +37,11 @@ function filterData(data) {
         flagUrl: country.flags.svg,
         lang: country.languages
     }))
-    if (filteredData.length > 10) {
-        return Notify.info('Too many matches found. Please enter a more specific name.')
-    }
-    else if (filteredData.length >= 2 && filteredData.length < 10) {
+    if (filteredData.length >= 2 && filteredData.length <= 10) {
         fillElementWithContent(countryList, createListMarkup, filteredData);
         clearElementContent(countryInfo);
     }
-    else if (filteredData.length === 1) {
+    if (filteredData.length === 1) {
         fillElementWithContent(countryInfo, createCountryInfoMarkup, filteredData);
         clearElementContent(countryList);
     }
@@ -73,11 +72,5 @@ function createCountryInfoMarkup(items) {
 }
 
 function createLanguagesMarkup(languagesObj) {
-    let langArr = [];
-    for (const key in languagesObj) {
-        langArr.push(languagesObj[key])
-    }
-    return langArr.map((country) => {
-        return `${country}`
-    }).join(', ')
+    return Object.values(languagesObj).join(', ')
 }
